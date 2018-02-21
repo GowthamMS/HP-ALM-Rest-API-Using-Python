@@ -25,6 +25,7 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 LOG = logging.getLogger(__name__)
 LOG.addHandler(logging.FileHandler('%s.log' % __name__, 'w'))
 
+BASE_URL = 'http://<Enter Your URL>.com:<Enter Your Port>'
 USERNAME = 'xxxxx'
 PASSWORD = 'xxxxx'
 DOMAIN = 'xxxxx'
@@ -55,8 +56,8 @@ class HpALMRest(object):
         :return:
         """
         credentials = (self.username, self.password)
-        auth_url = 'http://<Enter Your URL>.com:<Enter Your Port>/qcbin/' \
-                   'authentication-point/authenticate'
+        auth_url = '%s/qcbin/' \
+                   'authentication-point/authenticate' % BASE_URL
         response = requests.request("POST", url=auth_url, auth=credentials)
         LOG.info('URL: %s\nResponse Code: %s', auth_url, response.status_code)
 
@@ -67,7 +68,7 @@ class HpALMRest(object):
         cookie = (response.headers['Set-Cookie'].split(';')[0].replace('LWSSO_COOKIE_KEY=', ''))
         self.cookies['LWSSO_COOKIE_KEY'] = cookie
 
-        session_url = "http://<Enter Your URL>.com:<Enter Your Port>/qcbin/rest/site-session"
+        session_url = "%s/qcbin/rest/site-session" % BASE_URL
         session_response = requests.request("POST", url=session_url, cookies=self.cookies)
         LOG.info('URL: %s\nResponse Code: %s', session_url, session_response.status_code)
 
@@ -94,7 +95,7 @@ class HpALMRest(object):
         Gets and lists all the available domains
         :return: domains(dict): domains details
         """
-        domains_url = 'http://<Enter Your URL>.com:<Enter Your Port>/qcbin/rest/domains'
+        domains_url = '%s/qcbin/rest/domains'  % BASE_URL
         response = requests.request("GET", url=domains_url,
                                     headers=self.header, cookies=self.cookies)
         LOG.info('URL: %s\nResponse Code: %s', domains_url, response.status_code)
@@ -113,8 +114,8 @@ class HpALMRest(object):
         :param domain_name:
         :return projects:
         """
-        projects_url = 'http://<Enter Your URL>.com:<Enter Your Port>/qcbin/rest/domains/%s/' \
-                       'projects/' % domain_name
+        projects_url = '%s/qcbin/rest/domains/%s/' \
+                       'projects/' % (BASE_URL, domain_name)
         response = requests.request("GET", url=projects_url,
                                     headers=self.header, cookies=self.cookies)
         LOG.info('URL: %s\nResponse Code: %s', projects_url, response.status_code)
@@ -134,8 +135,8 @@ class HpALMRest(object):
         :param project_name:
         :return total_tests_count:
         """
-        tests_url = 'http://<Enter Your URL>.com:<Enter Your Port>/qcbin/rest/domains/%s/' \
-                    'projects/%s/tests?page-size=1' % (domain_name, project_name)
+        tests_url = '%s/qcbin/rest/domains/%s/' \
+                    'projects/%s/tests?page-size=1' % (BASE_URL, domain_name, project_name)
         response = requests.request("GET", url=tests_url, headers=self.header, cookies=self.cookies)
         LOG.info('URL: %s\nResponse Code: %s', tests_url, response.status_code)
 
@@ -158,8 +159,9 @@ class HpALMRest(object):
         """
         total_tests_count = self.get_total_tests_count(domain_name=domain_name,
                                                        project_name=project_name)
-        tests_url = 'http://<Enter Your URL>.com:<Enter Your Port>/qcbin/rest/domains/%s/' \
-                    'projects/%s/tests?page-size=%s' % (domain_name, project_name,
+        tests_url = '%s/qcbin/rest/domains/%s/' \
+                    'projects/%s/tests?page-size=%s' % (BASE_URL, domain_name,
+                                                        project_name,
                                                         total_tests_count)
         LOG.info('Fetching All Tests.Time Consuming!.Please wait.')
         response = requests.request("GET", url=tests_url, headers=self.header, cookies=self.cookies)
